@@ -1,7 +1,21 @@
 
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
+## How am I feeling right now?
+- Overwhelmed
+- Excited
+- Slightly confused
+
+It feels as if you gave us written instructions to teach us how to swim, and now I am in the water, trying to understand these instructions and not to drown.
+
+## What do I expect to learn?
+I would like to learn the how to perform statistical analysis with R.  
+
+## Where did I hear about the course?
+I've found the course when I was looking for options to learn data science in *University of Helsinki*.  
+
+## My GitHub Repository
+[Click here!](https://github.com/vapeshko/IODS-project)  
 
 ```{r}
 # This is a so-called "R chunk" where you can write R code.
@@ -9,5 +23,4 @@
 date()
 
 ```
-The text continues here.
 
