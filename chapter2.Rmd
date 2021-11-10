@@ -25,7 +25,8 @@ learning2014 <- select(learning2014, one_of(c("gender","age","attitude","deep", 
 
 library(ggplot2)
 library(GGally)
-ggpairs(learning2014, mapping = aes(col=gender, alpha=0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+ggpairs(learning2014, mapping = aes(col=gender, alpha = 0.3), upper = list(continuous = wrap("cor", size=3)), lower = list(continuous = wrap("points", size = 0.3), combo = wrap("facethist", bins = 20)))
 
 ```
 Insert para 4 fitting model
