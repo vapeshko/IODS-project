@@ -16,7 +16,7 @@ str(learning2014)
 
 As you can see from the graph below, female participants comprise the majority of the course. They tended to be only slightly younger than their male counterparts, and slightly more successful in the final grading. As for leaning habits, both male and female students show similar affiliation with deep and strategic learning, whereas surface learning is markedly more preset within the male population. Another notable difference between genders can be seen in attitude, with male students expressing higher regard for statistics than female students.
 
-In our further analysis we plan to investigate the impact on learning outcomes.
+In our further analysis we plan to investigate the impact on learning outcomes, that is, we are treating our *points* variable as dependent variable. Our analysis of the correlation between different variables indicates that *attitude* the strongest and most statistically significant relationship to *points*. Less significant, but still of interest, is potential positive association of the course mark with strategic learning and negative one with surface learning. These relationships make common sense: positive attitude towards the study subject and strategic approach to learning result in higher marks, while surface learning allows very limited understanding of the subject and will probably lead to a lower grade. In the next secrion we will inroduce some tests to these assumptions.
 
 ```{r}
 #changing the order of rows
