@@ -1,9 +1,9 @@
-# Approaches to learning: data analysis
+# Approaches to learning: a data analysis
 
 
-## Aim of the project and data
+## Aim of the chapter and data
 
-The project explores the impact of various factors on learning outcomes. To achieve this aim a survey was conducted among statistics course students in 2014. The researchers collected information about gender and age of the participants. The survey asked the participants to indicate their attitude towards statistics, and fill in the questionnaire describing their learning habits. The answers were divided into three categories, describing general ways of learning. We have called them deep, surface and strategic learning. Finally, the final mark of the course, given in points, was included in the data. After initial processing of the data, we have produced a data set, consisting of 166 observations over 7 variables.
+This chapter explores the impact of various factors on learning outcomes. To achieve this aim a survey was conducted among statistics course students in 2014. The researchers collected information about gender and age of the participants. The survey asked the participants to indicate their attitude towards statistics, and fill in the questionnaire describing their learning habits. The answers were divided into three categories, describing general ways of learning. They were defined as deep, surface and strategic learning. Finally, the final mark of the course, given in points, was included in the data. After initial processing of the data, I have produced a data set, consisting of 166 observations over 7 variables.
 
 ```{r}
 learning2014 <- read.table("Z:\\Documents\\RProjects\\IODS-project\\data\\learning2014.csv", header = TRUE, sep = ",", row.names = 1)
@@ -16,7 +16,7 @@ str(learning2014)
 
 As you can see from the graph below, female participants comprise the majority of the course. They tended to be only slightly younger than their male counterparts, and slightly more successful in the final grading. As for leaning habits, both male and female students show similar affiliation with deep and strategic learning, whereas surface learning is markedly more preset within the male population. Another notable difference between genders can be seen in attitude, with male students expressing higher regard for statistics than female students.
 
-In our further analysis we plan to investigate the impact on learning outcomes, that is, we are treating our *points* variable as dependent variable. Our analysis of the correlation between different variables indicates that *attitude* the strongest and most statistically significant relationship to *points*. Less significant, but still of interest, is potential positive association of the course mark with strategic learning and negative one with surface learning. These relationships make common sense: positive attitude towards the study subject and strategic approach to learning result in higher marks, while surface learning allows very limited understanding of the subject and will probably lead to a lower grade. In the next secrion we will inroduce some tests to these assumptions.
+In our further analysis we plan to investigate the impact on learning outcomes, that is, we are treating our *points* variable as dependent variable. Our analysis of the correlation between different variables indicates that *attitude* has the strongest and most statistically significant relationship to *points*. Less significant, but still of interest, is potential positive association of the course mark with strategic learning (*stra*) and negative one with surface learning (*surf*). These relationships make common sense: positive attitude towards the study subject and strategic approach to learning result in higher marks, while surface learning allows very limited understanding of the subject and will probably lead to a lower grade. In the next section we will introduce some tests to these assumptions.
 
 ```{r}
 #changing the order of rows
@@ -26,10 +26,13 @@ learning2014 <- select(learning2014, one_of(c("gender","age","attitude","deep", 
 library(ggplot2)
 library(GGally)
 
-ggpairs(learning2014, mapping = aes(col=gender, alpha = 0.3), upper = list(continuous = wrap("cor", size=3)), lower = list(continuous = wrap("points", size = 0.3), combo = wrap("facethist", bins = 20)))
+ggpairs(learning2014, mapping = aes(col=gender, alpha = 0.3), upper = list(continuous = wrap("cor", size=2.5)), lower = list(continuous = wrap("points", size = 0.3), combo = wrap("facethist", bins = 20)))
 
 ```
-Insert para 4 fitting model
+
+## Linear regression analysis and model validation
+
+Our first attempt at fitting the linear model has demonstrated that only attitude has a statistically significant association with the grade of the course. Although beta coefficients of strategic and surface learning are higher, their low t-values and high p-values, do not allow us to interpret them as significant enough. As the R^2^ value suggests,the current model explains around 19% of our records. 
 
 ```{r}
 model_learning2014 <- lm(points~ attitude + stra + surf, data = learning2014)
@@ -37,18 +40,30 @@ model_learning2014 <- lm(points~ attitude + stra + surf, data = learning2014)
 summary(model_learning2014)
 ```
 
-Insert para 5 fitting the model further
+For the next step we have excluded surface learning from the equation. Overall, it did not significantly change our initial results. It shows very similar results for our *attitude* variable, and the statistical significance of strategic learning has increased only to the 0.1 level.
+
+**We can conclude that attitude towards statistics and strategic learning to some extent are positively associated with the final grade.** In other words, positive attitude towards the study subject and strategizing the learning process increase chances to complete the course successfully.
 
 ```{r}
-model2_learning2014 <- lm(points~ attitude, data = learning2014)
-
+model2_learning2014 <- lm(points~ attitude + stra, data = learning2014)
 summary(model2_learning2014)
 ```
+To make sure that the second model is the best one, we are going to compare their AIC values. Indeed, we can observe that the model with only two variables *attitude* and strategic learning (*stra*) has the lowest AIC index, so it is a better fit.
 
-Insert para 6
+```{r}
+library(AICcmodavg)
+
+models <- list(model_learning2014, model2_learning2014)
+mod.names <- c("att.stra.surf", "att.stra")
+aictab(cand.set = models, modnames = mod.names)
+
+```
+Finally, we are going to test the validity of our model. Our constant variance assumption is tested with residuals vs fitted values plot. Since we can observe no questionable patterns, we can conclude that the assumption is valid. We  test normality assumption with a QQ-plot, which suggests that the errors are reasonably distributed. Our Residuals vs Leverage plot shows that no value has a significant leverage. As you can see the scale of the leverage axis, the highest value is estimated to be only around 0.05.
 
 ```{r}
 par(mfrow = c(2,2))
 plot(model2_learning2014, which=c(1,2,5))
+
+```
 
 ```

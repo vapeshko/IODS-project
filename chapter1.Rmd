@@ -17,10 +17,3 @@ I've found the course when I was looking for options to learn data science in *U
 ## My GitHub Repository
 [Click here!](https://github.com/vapeshko/IODS-project)  
 
-```{r}
-# This is a so-called "R chunk" where you can write R code.
-
-date()
-
-```
-
