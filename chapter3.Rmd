@@ -1,0 +1,19 @@
+# Alchohol consumption among teenagers
+
+## Aims of the chapter and data
+[Insert para 1]
+
+```{r}
+library(dplyr)
+alc <- read.csv(file = "Z:\\Documents\\RProjects\\IODS-project\\data\\students.csv")
+glimpse(alc)
+
+```
+
+## Possible factors affecting high alcohol consumption
+
+```{r}
+library(tidyr)
+library(ggplot2)
+
+```
