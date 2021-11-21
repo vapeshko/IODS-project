@@ -1,19 +1,109 @@
 # Alchohol consumption among teenagers
 
-## Aims of the chapter and data
-[Insert para 1]
+
+
+## Aim of the chapter and data
+
+This chapter investigates factors connected to high consumption of alcohol among teenagers. I am going to use the data from two surveys, collected by Prof Paulo Cortez (see more infromation about the data [here](https://archive.ics.uci.edu/ml/datasets/Student+Performance)). The data set consists of 370 observations and 35 variables.
 
 ```{r}
+date()
+
 library(dplyr)
 alc <- read.csv(file = "Z:\\Documents\\RProjects\\IODS-project\\data\\students.csv")
+
 glimpse(alc)
 
 ```
 
-## Possible factors affecting high alcohol consumption
+## Selecting possible factors and formulating a hypothesis
+
+My first assumption is that high consumption of alcohol(`high_use`) would be visible in teens' school performance, i.e. in grades (`G3`) and class `failures`, as well as their `absences` from school. I also speculate that difficult relationship with family may lead to alcohol abuse (`famrel`, evaluated by respondents on the scale from 0 to 5). Moreover, I assume that teenagers from urban districts might consume much more alcohol than their counterparts from rural areas, due to easier access to bars, clubs and parties (`address`). Finally, I will consider the impact of gender (coded here as `sex`).
+
+As you can see from two summaries below, there is no dramatic differences between teens consuming high amounts of alcohol from urban and rural addresses is not very great, so I am not going to consider it at modelling stage. Meanwhile, comparison by gender does reveal some notable differences. The proportion of boys, consuming high amounts of alcohol is significantly larger, and they tend to have lower grades. Boxplot B also makes clear that higher mean of `absences` among girls is driven by outliers, and mean is actually higher for boys. Family relationship does not show variation by gender, but it tends to be lower among teens, who have high alcohol consumption.
 
 ```{r}
 library(tidyr)
+
+alc$address <- alc$address %>% as.factor()
+alc$sex <- alc$sex %>% as.factor()
+
+alc %>% group_by(address, high_use) %>%  summarise(count = n(), mean_grade = mean(G3), failures = mean(failures), absences = mean(absences), famrel = mean(famrel))
+
+alc %>% group_by(sex, high_use) %>%  summarise(count = n(), mean_grade = mean(G3), failures = mean(failures), absences = mean(absences), famrel = mean(famrel))
+
 library(ggplot2)
+library(cowplot)
+
+g1 <- ggplot(alc, aes(x = high_use, y =sex, col= sex)) + geom_count()
+
+g2 <- ggplot(alc, aes(x = high_use, y = absences, col=sex)) + geom_boxplot()
+
+g4 <- ggplot(alc, aes(x = high_use, y = G3, col=sex)) + geom_boxplot() + ylab("grade")
+
+g5 <- ggplot(alc, aes(x = high_use, y = famrel, col = sex)) + geom_boxplot()+ ylab("family relationship")
+
+plot_grid(g1, g2, g4, g5, labels = "AUTO")
+
+```
+
+## The Model
+
+To get a model, that could detect teenagers with high values of alcohol use I am going to create four logistic models with different combinations of variables, I discussed above, as predictors. Then, I am going to test, which model has the lowest AIC value, i.e. is a better fitting one. The table below shows that the best model (`m2`) includes `failures`, `absences`, `sex` and `famrel`.
+
+Summary of the model reveals that all regression coefficients are statistically significant. The most significant relationship is with `absences` and `sex`. Estimated regression coefficient for `absences` is 0.09, which means that the estimated increase in log odds of having `high_use` as TRUE is 0.08 for each increase of 1 in the `absences`, whereas `sex` coefficient should be interpreted as the log odds of having `high_use` as TRUE for boys is 1.05 higher than for girls.
+
+Next, I am calculating odds ratios from regression coefficients. The resulting values should be interpreted as follows:
+
+* for a one unit increase in `failures` the odds of having `high_use` as TRUE increase by 77%. 
+* for a one unit increase in `absences` the odds of having `high_use` as TRUE increase by 9%.
+* for boys the the odds of having `high_use` as TRUE increase by 185%.
+* for a one unit increase in `famrel` the odds of having `high_use` as TRUE decrease by 26%.
+
+None of the confidence intervals contain 1, which means that all variables are not independent from `high_use`.
+
+```{r}
+m1 <- glm(high_use ~ failures + absences + sex + G3 + famrel, data = alc, family = "binomial")
+
+m2 <- glm(high_use ~ failures + absences + sex + famrel, data = alc, family = "binomial")
+
+m3 <- glm(high_use ~ failures + absences + sex, data = alc, family = "binomial")
+
+m4 <- glm(high_use ~ famrel + absences + sex, data = alc, family = "binomial")
+
+library(AICcmodavg)
+
+models <- list(m1, m2, m3, m4)
+mod.names <- c("fal.abs.sex.gr.fam", "fal.abs.sex.fam","fal.abs.sex", "abs.sex.fam" )
+aictab(cand.set = models, modnames = mod.names)
+
+summary(m2)
+
+OR <- coef(m2) %>% exp
+CI <- confint(m2) %>% exp
+cbind(OR, CI)
+
+```
+
+## Predictive power of my model
+
+Now I will test how well does my model predict the high values of alcohol consumption among teenagers. As can be seen from the tabulations below, this model predicts 17% of the cases wrongly. The overall accuracy of the model is rather high (the mean prediction error is only 0.25).
+
+```{r}
+probabilities <- predict(m2, type = "response")
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = probability > 0.5)
+
+table(high_use = alc$high_use, prediction = alc$prediction)
+table(high_use = alc$high_use, prediction = alc$prediction)  %>% prop.table() %>% addmargins()
+
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+loss_func(class = alc$high_use, prob = alc$probability)
+
+```
 
 ```
