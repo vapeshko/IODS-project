@@ -1,12 +1,12 @@
 # Alchohol consumption among teenagers
 
 
-
 ## Aim of the chapter and data
 
 This chapter investigates factors connected to high consumption of alcohol among teenagers. I am going to use the data from two surveys, collected by Prof Paulo Cortez (see more infromation about the data [here](https://archive.ics.uci.edu/ml/datasets/Student+Performance)). The data set consists of 370 observations and 35 variables.
 
 ```{r}
+
 date()
 
 library(dplyr)
@@ -106,4 +106,3 @@ loss_func(class = alc$high_use, prob = alc$probability)
 
 ```
 
-```
