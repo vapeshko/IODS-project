@@ -1,6 +1,8 @@
 # Valeria Peshko 23.11.2021
 # Ex4 Data Wrangling
 
+setwd("Z:/Documents/RProjects/IODS-project/data")
+
 # read Human Development data
 hd <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human_development.csv", stringsAsFactors = F)
 
@@ -12,6 +14,11 @@ library(dplyr)
 
 glimpse(hd)
 glimpse(gii)
+
+# summaries of variables
+
+summary(hd)
+summary(gii)
 
 # rename variables
 
