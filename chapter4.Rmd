@@ -138,8 +138,9 @@ table(correct = correct_classes, predicted = lda.pred$class)
 ```
 ## K-means clustering
 
+I will try to use another clustering method on Boston data -- K-means clustering.
 
-### Preparing the data set
+### Scaling the data set
 
 ```{r}
 # reloading data
@@ -168,6 +169,17 @@ summary(dist_man)
 ```
 ### K means clustering
 
+I will first try running k-means algorithm with 4 clusters, as our basic classification was based on quanttiles. From plots of `rad`` and `tax`, we can again see blue group separated from the other three color points, so it seema that anather k value will give better results.
+
+```{r}
+km <-kmeans(Boston_scaled, centers = 4)
+
+pairs(Boston_scaled, col = km$cluster)
+
+```
+
+I will determine the oprimal number of clusters by plotting total of within cluster sum of squares by number of cluster (with maximum k = 10). We can see that the first "elbow" of the plot at k=2. Running k-means algorithm with two centers indeed gives a clear picture of two clusters.
+
 ```{r}
 set.seed(123)
 
@@ -186,4 +198,39 @@ km <-kmeans(Boston_scaled, centers = 2)
 # plot the Boston dataset with clusters
 pairs(Boston_scaled, col = km$cluster)
 ```
+
+## Bonus
+
+Here I am fitting lda model with k-means clusters as a target variable. The bi-plot again shows separation of our three k-clusters in two distict groups. `indus`, `nox`, `tax` and `rad` seem to pull the two groups apart, that means that Boston suburbs could be separated by proportion of industries located in the area, pollution level, full-value property-tax rate and accessibility of highways. Crime level doesn't seem to be at play.  
+
+```{r}
+# reloading data
+data("Boston")
+
+# scaling
+boston_scale <- scale(Boston)
+boston_scale <- as.data.frame(boston_scale)
+
+# somehow knitting doesn't work with this varible
+boston_scale <- dplyr::select(boston_scale, -chas)
+
+# running K-means algorithm
+km <-kmeans(boston_scale, centers = 3)
+
+# adding new clusters as target variable
+clusters <- as.factor(km$cluster)
+
+boston_scale <- mutate(boston_scale, clusters = clusters)
+
+# running LDA
+lda.fit2 <- lda(clusters ~ ., data = boston_scale)
+
+# plotting the lda results
+class <- as.numeric(boston_scale$clusters)
+
+plot(lda.fit2, dimen = 2, col = class, pch = class)
+lda.arrows(lda.fit2, myscale = 3)
+
+```
+
 
