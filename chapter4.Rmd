@@ -14,6 +14,7 @@ library(MASS)
 library(dplyr)
 library(tidyr)
 library(corrplot)
+library(ggplot2)
 
 data("Boston")
 
@@ -75,7 +76,7 @@ summary(boston_scaled$crime)
 
 ### Dividing to train and test sets
 
-Finally, I am dividing the set, allocating 80% as trai data, and the rest as test data.
+Finally, I am dividing the set, allocating 80% as train data, and the rest as test data.
 
 ```{r}
 # number of rows in the Boston data set 
@@ -99,7 +100,12 @@ test <- dplyr::select(test, -crime)
 
 ## LDA analysis
 
+### Fitting the model
+
+Now the data set is ready to be fitted to LDA with crime rate as the target variable. The result is visualized with a biplot. It is clear from the plot that my initial hypothesis was correct, the cases are divided in two distinct clusters: a bigger one, consisting of all low and med_low cases, majority of med_high and a smaller one with majority of high cases and several med_high. Arrows make it clear that the strongest factor dividing the clusters seems to be accessibility of radial highways, `rad`.
+
 ```{r}
+
 lda.fit <- lda(crime ~ ., data = train)
 
 # the function for lda biplot arrows
@@ -118,5 +124,66 @@ classes <- as.numeric(train$crime)
 # plotting the lda results
 plot(lda.fit, dimen = 2, col = classes, pch = classes)
 lda.arrows(lda.fit, myscale = 1.5)
+```
+
+### Testing the model
+
+Test of the model's prediction capacity has revealed that it is rather accurate. It has correctly predicted all high cases, 78% of med_high and 68% of low. The model seems performs worse in the med_low category with only 41% of correct predictions.
+
+```{r}
+lda.pred <- predict(lda.fit, newdata = test)
+
+table(correct = correct_classes, predicted = lda.pred$class)
+
+```
+## K-means clustering
+
+
+### Preparing the data set
+
+```{r}
+# reloading data
+data("Boston")
+
+# scaling
+Boston_scaled <- scale(Boston)
+
+Boston_scaled <- as.data.frame(Boston_scaled)
+
+```
+
+### Calculating distances
+
+```{r}
+# Euclidean distance
+dist_eu <- dist(Boston_scaled)
+
+# Manhattan distance
+dist_man <- dist(Boston_scaled, method = "manhattan")
+
+# summaries
+summary(dist_eu)
+summary(dist_man)
+
+```
+### K means clustering
+
+```{r}
+set.seed(123)
+
+# determine the number of clusters
+k_max <- 10
+
+# calculate the total within sum of squares
+twcss <- sapply(1:k_max, function(k){kmeans(Boston_scaled, k)$tot.withinss})
+
+# visualize the results
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+
+# k-means clustering
+km <-kmeans(Boston_scaled, centers = 2)
+
+# plot the Boston dataset with clusters
+pairs(Boston_scaled, col = km$cluster)
 ```
 
