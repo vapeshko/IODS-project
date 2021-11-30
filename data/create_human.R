@@ -46,14 +46,48 @@ colnames(gii)
 
 # create new variables
 
-gii <- mutate(gii, sec_ed_rat = sec_ed_f/sec_ed_m)
-print(gii$sec_ed_rat)
+gii <- mutate(gii, sec_ed_fm = sec_ed_f/sec_ed_m)
 
-gii <- mutate(gii, lab_rat = lab_f/lab_m)
-print(gii$lab_rat)
+gii <- mutate(gii, lab_fm = lab_f/lab_m)
+
 
 human <- inner_join(hd, gii, by = "Country")
-glimpse(human)
 
 # save new data set
 write.csv(human, "human.csv")
+
+# Ex 5 Data Wrangling
+
+# structure of combined HDI (Human Development Index) 
+# and GII (Gender Inequality Index) data sets
+# by country
+
+str(human) 
+## 194 obs. 19 vars.
+
+# change GNIpc into numeric variable
+library(stringr)
+human$GNIpc <- str_replace(human$GNIpc, pattern=",", replace ="") %>% as.numeric()
+str(human$GNIpc)
+
+# selecting variables
+keep <- c("Country", "sec_ed_fm", "lab_fm", "exp_ed", "life_exp", "GNIpc", "mat_mr", "adol_br", "rep_parl")
+human <- dplyr::select(human, one_of(keep))
+
+# remove rows with NA
+human2 <- filter(human, complete.cases(human))
+
+# remove regions
+tail(human2, 10)
+human2 <- human2[1:155, ]
+
+# define row names as countries
+rownames(human2) <- human2$Country
+human2 <- dplyr::select(human2, -Country)
+
+# check resulting data set
+str(human2)
+## 155 observations and 8 variables
+
+# saving
+write.csv(human2, "human.csv")
