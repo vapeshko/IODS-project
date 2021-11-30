@@ -1,10 +1,13 @@
-# Dimensionality reduction
+# Dimensionality reduction techniques
 
-## Overview of the data
+## Principal Component Analysis
+
+### Overview of the data
 
 Note where medians are higher than the means
 ```{r}
 library(tidyr)
+library(dplyr)
 library(ggplot2)
 library(GGally)
 library(corrplot)
@@ -24,29 +27,67 @@ gather(human) %>% ggplot(aes(x = key,y = value)) + facet_wrap("key", scales = "f
 
 # correlation plots
 ggpairs(human)
-cor(human) %>% corrplot()
+cor(human) %>% corrplot(type = "upper")
 
 ```
 
-## PCA on not-standardized data set
-
+### PCA on not-standardized data set
 
 ```{r}
+# display variance
+human %>% summarise_all(var)
+
+# running pca
 pca_human <- prcomp(human)
 
-biplot(pca_human, choices = 1:2, cex = c(0.4, 0.8))
+# calculating percentages of variance
+s <- summary(pca_human)
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+
+# drawing a biplot
+## creating labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+## biplot
+biplot(pca_human, choices = 1:2, cex = c(0.4, 0.8), xlab = pc_lab[1], ylab = pc_lab[2])
 
 ```
 
-## PCA on standardized data set
-
+### PCA on standardized data set
 
 ```{r}
-human_std <- scale(human)
+# scaling the data set
+human_std <- scale(human) %>% as.data.frame()
 
-pca_human <- prcomp(human_std)
+# scaled variance
+human_std %>% summarise_all(var)
 
-biplot(pca_human, choices = 1:2, cex = c(0.4, 0.5))
+# running pca
+pca_human_std <- prcomp(human_std)
+pca_human_std
+
+# calculating percentages of variance
+s2 <- summary(pca_human_std)
+pcapr <- round(100*s2$importance[2, ], digits = 1)
+
+# drawing a biplot
+## creating labels
+pc_lab2 <- paste0(names(pcapr), " (", pcapr, "%)")
+
+
+## biplot
+biplot(pca_human_std, choices = 1:2, cex = c(0.4, 0.6), xlab = pc_lab2[1], ylab = pc_lab2[2])
 
 ```
 
+### Interpretation
+
+PCA on not-standardized data shows that GNI as a variable with the highest variance is enough to predict the overall variance of the data set.
+
+When the data set is scaled, the variance of each variable is 1, and we can see that principal components has become more multifaceted. The second biplot demonstrates that:
+
+* PC1 is pulled to positive values by adolescent birth rate and maternal mortality ratio. It is pulled to negative values by GNI, life expectancy at birth, expectancy of education and secondary education ratio between women and men.
+
+* PC2 is pulled to positive values by women's labour force participation rate and proportion of women in parliament.
+
+Overall, PC1 could be regarded as women's quality of life index, PC2 - as women's societal integration index.

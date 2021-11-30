@@ -214,6 +214,8 @@ boston_scale <- as.data.frame(boston_scale)
 # somehow knitting doesn't work with this varible
 boston_scale <- dplyr::select(boston_scale, -chas)
 
+set.seed(1234)
+
 # running K-means algorithm
 km <-kmeans(boston_scale, centers = 3)
 
@@ -232,5 +234,4 @@ plot(lda.fit2, dimen = 2, col = class, pch = class)
 lda.arrows(lda.fit2, myscale = 3)
 
 ```
-
 
