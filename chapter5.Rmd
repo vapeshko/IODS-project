@@ -86,8 +86,46 @@ PCA on not-standardized data shows that GNI as a variable with the highest varia
 
 When the data set is scaled, the variance of each variable is 1, and we can see that principal components has become more multifaceted. The second biplot demonstrates that:
 
-* PC1 is pulled to positive values by adolescent birth rate and maternal mortality ratio. It is pulled to negative values by GNI, life expectancy at birth, expectancy of education and secondary education ratio between women and men.
+* PC1 of a country is pulled to positive values by adolescent birth rate and maternal mortality ratio. It is pulled to negative values by GNI, life expectancy at birth, expectancy of education and secondary education ratio between women and men.
 
-* PC2 is pulled to positive values by women's labour force participation rate and proportion of women in parliament.
+* PC2 of a country is pulled to positive values by women's labour force participation rate and proportion of women in parliament.
 
 Overall, PC1 could be regarded as women's quality of life index, PC2 - as women's societal integration index.
+
+## Multipal Correspondence Analysis
+
+### Data
+
+```{r}
+# reading the data
+library(FactoMineR)
+data("tea")
+
+# overview
+str(tea)
+summary(tea)
+
+gather(tea[1:18]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))+ labs(x = NULL, y = NULL)
+
+gather(tea[19:36]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))+ labs(x = NULL, y = NULL)
+
+```
+
+### MCA
+
+```{r}
+# selecting columns
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch", "breakfast", "dinner", "home")
+
+tea_time <- select(tea, one_of(keep_columns))
+
+# multiple correspondence analysis
+mca <- MCA(tea_time, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+```
+
