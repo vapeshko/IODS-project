@@ -4,7 +4,12 @@
 
 ### Overview of the data
 
-Note where medians are higher than the means
+I am going to use the method of Principal Component Analysis (PCA) on a data set, I have constructed from Human Development Index data and Gender Inequality Index data. The purpose of this exercise is to reduce the dimensions of the resulting data set, in other words, "compress" the varibles into a smaller number of components, that we could then attempt to interpret.
+
+This data set consists of 155 countries and 8 variables. The summary of the variables suggest, that global development is imbalanced (shoker!). For instance, we can see drastic differences between means ans medians in maternal mortality ratio (`Mat.Mor`) and adolescent birth rate (`Ado.Birth`), that suggests that there is a group of countries with very high values, pushing the mean up. Correlation plot suggests that there is a significant positive relationship between these valuables. Furthemore, the two variables have strong negative relationships with life expectancy (`Life.Exp`), education expectancy (`Edu.Exp`) and the ratio of female and male secondary education expectancy (`Edu2.FM`).
+
+Also can be of interest a dramatic rise from min to 1st quantile in `Edu2.FM`, and the ration of participation in the labor market (`Labo.FM`).
+
 ```{r}
 library(tidyr)
 library(dplyr)
@@ -96,6 +101,8 @@ Overall, PC1 could be regarded as women's quality of life index, PC2 - as women'
 
 ### Data
 
+Multiple Correspondence Analysis (MCA) is a technique that can help to understand proximities between categorical variables by plotting them against two dimensions, we construct in a way similar to PCA. For this exersice I am using tea data set from the packsge FactoMineR, that records various attributes of tea consumtion. It consists of 300 observations over 36 varianles. Below is the summary and the graphic overvie of this data.
+
 ```{r}
 # reading the data
 library(FactoMineR)
@@ -113,11 +120,21 @@ gather(tea[19:36]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") +
 
 ### MCA
 
+To demonstrate how MCA is used and interpreted I am going to select 8 variables from tea data set. We are going to see how the choice of the product, modes of tea consumption and circumstances of drinking it (meals of the day) are related to each other.
+
+Examination of MCA plot reveals some interesting patterns: 
+
+* Green tea consumption seems to occur during dinner time, while consumption of black tea and Earl Grey seems to be rather independent from meals of the day.
+
+* People who prefer packaged tea tend to shop in chain store markets, whereas those who prefer unpackaged -- at tea shops.
+
+* Earl Grey is often consumed with sugar, while black tea for many goes well with lemon.
+
 ```{r}
 # selecting columns
-keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch", "breakfast", "dinner", "home")
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch", "breakfast", "dinner")
 
-tea_time <- select(tea, one_of(keep_columns))
+tea_time <- dplyr::select(tea, one_of(keep_columns))
 
 # multiple correspondence analysis
 mca <- MCA(tea_time, graph = FALSE)
@@ -127,5 +144,15 @@ summary(mca)
 
 # visualize MCA
 plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+```
+
+We can plot not only variables, but also individuals. While the first plot shows that there is some over lap in habits between the drinkers of different kinds of tea, the second plot reveals that the sample is separated into three rather distinct group when it comes to where tea is bought.
+
+```{r}
+
+plot(mca, invisible=c("var"), habillage = "Tea", graph.type = "classic")
+     
+plot(mca, invisible=c("var"), habillage = "where", graph.type = "classic")
+
 ```
 
