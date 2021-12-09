@@ -43,9 +43,9 @@ BPRSL <-  BPRS %>% gather(key = weeks, value = bprs, -treatment, -subject)
 RATSL <- RATS %>% gather(key = days, value = weights, -ID, -Group)
 
 # saving weeks and days as numbers
-BPRSL <-  BPRSL %>% mutate(week = as.integer(substr(weeks,5,5)))
+BPRSL <-  BPRSL %>% mutate(week = as.integer(substr(weeks, 5, nchar(weeks))))
 
-RATSL <- RATSL %>% mutate(day = as.integer(substr(days, 3,3)))
+RATSL <- RATSL %>% mutate(day = as.integer(substr(days, 3, nchar(days))))
                            
 # serious look at the data sets
 head(BPRSL)
@@ -69,5 +69,9 @@ BPRSL %>% group_by(treatment, week) %>% summarise(num_subjects = n(), mean_bprs 
 RATSL %>% group_by(Group, day) %>% summarise(num_subjects = n(), mean_weight = mean(weights))
 
 ## we can also summarise all time points
-BPRSL %>% group_by(treatment) %>% summarise(num_obs = n(), mean_bprs = mean(bprs))
-RATSL %>% group_by(Group) %>% summarise(num_obs = n(), mean_weight = mean(weights))
+BPRSL %>% group_by(treatment) %>% summarise(num_obs = n(), mean_bprs = mean(bprs), median_bprs = median(bprs), sd_bprs = sd(bprs))
+RATSL %>% group_by(Group) %>% summarise(num_obs = n(), mean_weight = mean(weights), median_weight = median(weights), sd_weight = sd(weights))
+
+# saving the data sets
+write.csv(BPRSL, "BPRSL.csv", row.names = TRUE)
+write.csv(RATSL, "RATSL.csv", row.names = TRUE)

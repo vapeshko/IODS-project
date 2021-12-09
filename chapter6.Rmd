@@ -1,0 +1,82 @@
+# Analysis of longitudinal data
+
+```{r}
+# reading the data for this chapter
+RATSL <- read.table(file = "Z:\\Documents\\RProjects\\IODS-project\\data\\RATSL.csv", header = TRUE, sep = ",", row.names = 1)
+
+# libraries used
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+```
+
+## RATS
+
+### Overview of the data
+
+```{r}
+# structure of the data set
+glimpse(RATSL)
+head(RATSL)
+
+# transforming categorical variables to factor
+RATSL$ID <- as.factor(RATSL$ID)
+RATSL$Group <- as.factor(RATSL$Group)
+
+```
+
+
+### Graphical display
+
+```{r}
+# drawing the plot
+ggplot(RATSL, aes(x = day, y = weights, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:8, times=2)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(RATSL$weights), max(RATSL$weights))) + labs(y = "rat's weight in gm", x = "time in days", title = "title")
+
+```
+
+Let's observe tracking
+
+```{r}
+# standardising weights
+RATSL <- RATSL %>% group_by(day) %>%
+  mutate(std_weights = scale(weights) )  %>%
+  ungroup()
+
+# drawing new plot
+ggplot(RATSL, aes(x = day, y = std_weights, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:8, times=2)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(RATSL$std_weights), max(RATSL$std_weights))) + labs(y = "rat's standardised weight", x = "time in days", title = "title")
+
+```
+
+### Summary measure analysis
+
+```{r}
+# extracting number of days measurements were made
+n <- RATSL$day %>% unique() %>% length()
+
+# summary data with mean and standard error of weights by group and day 
+RATSS <- RATSL %>%
+  group_by(Group, day) %>%
+  summarise( mean = mean(weights), se = sd(weights)/sqrt(n) ) %>%
+  ungroup()
+
+ggplot(RATSS, aes(x = day, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = "right") +
+  scale_y_continuous(name = "mean(weight) +/- se(weight)") + labs(x = "time in days", title = "title")
+```
+
