@@ -8,7 +8,7 @@ RATSL <- read.table(file = "Z:\\Documents\\RProjects\\IODS-project\\data\\RATSL.
 library(tidyr)
 library(dplyr)
 library(ggplot2)
-
+library(lme4)
 ```
 
 ## RATS
@@ -78,5 +78,27 @@ ggplot(RATSS, aes(x = day, y = mean, linetype = Group, shape = Group)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
   theme(legend.position = "right") +
   scale_y_continuous(name = "mean(weight) +/- se(weight)") + labs(x = "time in days", title = "title")
+```
+
+Let's check for outliers
+
+```{r}
+# draw boxplots for groups
+ggplot(RATSS, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=3, fill = "white") +
+  scale_y_continuous(name = "mean(weight), days 1-64")
+```
+
+### One-way analysis of variance (ANOVA)
+
+```{r}
+# fitting anova
+ratss_aov <- aov(mean ~  Group, data = RATSS)
+summary(ratss_aov)
+
+# post-hoc test
+TukeyHSD(ratss_aov)
+
 ```
 
