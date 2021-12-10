@@ -30,15 +30,19 @@ BPRS %>% group_by(treatment) %>% summarise(n = n(), mean_w0 = mean(week0), mean_
 # weight means on first and last day of measurements by groups
 RATS %>% group_by(Group) %>% summarise(n = n(), mean_WD1 = mean(WD1), mean_WD64 = mean(WD64))
 
-# transforming categorical variables
-BPRS$treatment <- as.factor(BPRS$treatment)
-BPRS$subject <- as.factor(BPRS$subject)
+# creating id column in BPRS
+num_sub <- nrow(BPRS)
+BPRS <- BPRS %>% mutate(id = seq.int(num_sub) )
 
-RATS$ID <- as.factor(RATS$ID)
-RATS$Group <- as.factor(RATS$Group)
+# transforming categorical variables
+cat_vars <- c("treatment", "subject", "id")
+BPRS[cat_vars] <- lapply(BPRS[cat_vars], factor)
+
+cat_vars2 <- c("ID", "Group")
+RATS[cat_vars2] <- lapply(RATS[cat_vars2], factor)
 
 # transforming into long form
-BPRSL <-  BPRS %>% gather(key = weeks, value = bprs, -treatment, -subject)
+BPRSL <-  BPRS %>% gather(key = weeks, value = bprs, -treatment, -subject, -id)
 
 RATSL <- RATS %>% gather(key = days, value = weights, -ID, -Group)
 
